@@ -89,9 +89,11 @@ def count_in_spam(vocab_dict):
                     vocab_dict[word][1] += 1
         return n_count
 
-def train_multinomial_nb ():
+def train_multinomial_nb (stop_words):
     n, n_0, n_1, vocab = extract_vocabulary()
-    
+    for word in stop_words:
+        if word in vocab:
+            vocab.pop(word)
     total_words_class_0 = 0
     total_words_class_1 = 1
     for word in vocab: 
@@ -127,10 +129,32 @@ def apply_multinomial_nb (vocab, prior, filename):
     return 0 if score[0] >= score[1] else 1
                     
 
- 
-prior, vocab = train_multinomial_nb()
-filename2 = "./train/spam/0897.2004-04-23.GP.spam.txt"
+def read_stop_words(path):
+    stop_words = []
+    with open(path) as f:
+        for line in f:
+            stop_words.append(line.strip())
+    return stop_words
 
+prior, vocab = train_multinomial_nb([])
+total = 0
+correct = 0
+for test_ham_file_name in glob.glob(os.path.join(ham_test_set_path, '*.txt')):
+    total += 1
+    if apply_multinomial_nb(vocab, prior, test_ham_file_name) == 0:
+        correct += 1
+
+for test_spam_file_name in glob.glob(os.path.join(spam_test_set_path, '*.txt')):
+    total += 1
+    if apply_multinomial_nb(vocab, prior, test_spam_file_name) == 1:
+        correct += 1  
+
+print (correct)        
+print (total)
+print (correct/total)
+
+print ("########")   
+prior, vocab = train_multinomial_nb(read_stop_words("./stop_words.txt"))
 total = 0
 correct = 0
 for test_ham_file_name in glob.glob(os.path.join(ham_test_set_path, '*.txt')):
