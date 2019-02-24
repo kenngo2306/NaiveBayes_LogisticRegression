@@ -17,6 +17,9 @@ import math
 ham_train_set_path='./train/ham'
 spam_train_set_path='./train/spam'
 
+ham_test_set_path='./test/ham'
+spam_test_set_path='./test/spam'
+
 # vocabulary bag is a dictionary
 #   key: the unique word
 #   value: array of 2 items
@@ -106,19 +109,45 @@ def train_multinomial_nb ():
     
     return prior, vocab
 
+def custom_log2(number):
+    if number > 0:
+        return math.log2(number)
+    else:
+        return 0
+
 def apply_multinomial_nb (vocab, prior, filename):
     score = [math.log10(prior[0]), math.log2(prior[1])]
     with open(filename, errors = 'ignore') as f:
             for line in f:
                 line_arr= line.strip().split(' ')
                 for word in line_arr:
-                    score[0] += math.log2(vocab[word][2])
-                    score[1] += math.log2(vocab[word][1])
+                    if word in vocab:
+                        score[0] += custom_log2(vocab[word][2])
+                        score[1] += custom_log2(vocab[word][3])
     return 0 if score[0] >= score[1] else 1
                     
 
-print (test_return())   
-#prior_class_0, prior_class_1, vocab = train_multinomial_nb()
+ 
+prior, vocab = train_multinomial_nb()
+filename2 = "./train/spam/0897.2004-04-23.GP.spam.txt"
+
+total = 0
+correct = 0
+for test_ham_file_name in glob.glob(os.path.join(ham_test_set_path, '*.txt')):
+    total += 1
+    if apply_multinomial_nb(vocab, prior, test_ham_file_name) == 0:
+        correct += 1
+
+for test_spam_file_name in glob.glob(os.path.join(spam_test_set_path, '*.txt')):
+    total += 1
+    if apply_multinomial_nb(vocab, prior, test_spam_file_name) == 1:
+        correct += 1  
+
+print (correct)        
+print (total)
+print (correct/total)
+    
+#print(apply_multinomial_nb(vocab, prior, filename2))
 
 
         
