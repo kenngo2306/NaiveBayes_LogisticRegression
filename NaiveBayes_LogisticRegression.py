@@ -136,42 +136,96 @@ def read_stop_words(path):
             stop_words.append(line.strip())
     return stop_words
 
-prior, vocab = train_multinomial_nb([])
-total = 0
-correct = 0
-for test_ham_file_name in glob.glob(os.path.join(ham_test_set_path, '*.txt')):
-    total += 1
-    if apply_multinomial_nb(vocab, prior, test_ham_file_name) == 0:
-        correct += 1
-
-for test_spam_file_name in glob.glob(os.path.join(spam_test_set_path, '*.txt')):
-    total += 1
-    if apply_multinomial_nb(vocab, prior, test_spam_file_name) == 1:
-        correct += 1  
-
-print (correct)        
-print (total)
-print (correct/total)
-
-print ("########")   
-prior, vocab = train_multinomial_nb(read_stop_words("./stop_words.txt"))
-total = 0
-correct = 0
-for test_ham_file_name in glob.glob(os.path.join(ham_test_set_path, '*.txt')):
-    total += 1
-    if apply_multinomial_nb(vocab, prior, test_ham_file_name) == 0:
-        correct += 1
-
-for test_spam_file_name in glob.glob(os.path.join(spam_test_set_path, '*.txt')):
-    total += 1
-    if apply_multinomial_nb(vocab, prior, test_spam_file_name) == 1:
-        correct += 1  
-
-print (correct)        
-print (total)
-print (correct/total)
+#prior, vocab = train_multinomial_nb([])
+#total = 0
+#correct = 0
+#for test_ham_file_name in glob.glob(os.path.join(ham_test_set_path, '*.txt')):
+#    total += 1
+#    if apply_multinomial_nb(vocab, prior, test_ham_file_name) == 0:
+#        correct += 1
+#
+#for test_spam_file_name in glob.glob(os.path.join(spam_test_set_path, '*.txt')):
+#    total += 1
+#    if apply_multinomial_nb(vocab, prior, test_spam_file_name) == 1:
+#        correct += 1  
+#
+#print (correct)        
+#print (total)
+#print (correct/total)
+#
+#print ("######################")   
+#prior, vocab = train_multinomial_nb(read_stop_words("./stop_words.txt"))
+#total = 0
+#correct = 0
+#for test_ham_file_name in glob.glob(os.path.join(ham_test_set_path, '*.txt')):
+#    total += 1
+#    if apply_multinomial_nb(vocab, prior, test_ham_file_name) == 0:
+#        correct += 1
+#
+#for test_spam_file_name in glob.glob(os.path.join(spam_test_set_path, '*.txt')):
+#    total += 1
+#    if apply_multinomial_nb(vocab, prior, test_spam_file_name) == 1:
+#        correct += 1  
+#
+#print (correct)        
+#print (total)
+#print (correct/total)
     
 #print(apply_multinomial_nb(vocab, prior, filename2))
+
+
+############# Logistic Regression Algorithm part ###################
+
+
+# def
+def add_new_column_2(vocab_dict, word):
+    vocab_dict[word] = 0
+    return vocab_dict
+# Build a list of vectors of count of word, 1 vector per training example
+def build_vectors():
+    vectors = []
+    
+    
+    
+    n_0 = 0
+    
+    # build vectoes with ham emails
+    for filename in glob.glob(os.path.join(ham_train_set_path, '*.txt')):    
+        vector = [{},0]   
+        # count apprearance of each word for particular training example and store it in vocab_dict 
+        vocab_dict = {}
+        
+        with open(filename, errors='ignore') as f:
+            for line in f:
+                line_arr= line.strip().split(' ')
+                for word in line_arr:
+                    if word not in vocab_dict:
+                        add_new_column_2(vocab_dict, word)
+                    vocab_dict[word] += 1
+                    
+        vector[0] = vocab_dict
+        vectors.append(vector)
+    
+    for filename in glob.glob(os.path.join(spam_train_set_path, '*.txt')):
+        vector = [{},1]
+        
+        # count apprearance of each word for particular training example and store it in vocab_dict 
+        vocab_dict = {}
+        
+        with open(filename, errors='ignore') as f:
+            for line in f:
+                line_arr= line.strip().split(' ')
+                for word in line_arr:
+                    if word not in vocab_dict:
+                        add_new_column_2(vocab_dict, word)
+                    vocab_dict[word] += 1
+                    
+        vector[0] = vocab_dict
+        vectors.append(vector)
+
+    return vectors  
+
+build_vectors()  
 
 
         
