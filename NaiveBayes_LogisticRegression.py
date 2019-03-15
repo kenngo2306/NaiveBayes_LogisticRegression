@@ -208,10 +208,8 @@ def build_vectors():
     
     for filename in glob.glob(os.path.join(spam_train_set_path, '*.txt')):
         vector = [{},1]
-        
         # count apprearance of each word for particular training example and store it in vocab_dict 
-        vocab_dict = {}
-        
+        vocab_dict = {}  
         with open(filename, errors='ignore') as f:
             for line in f:
                 line_arr= line.strip().split(' ')
@@ -225,7 +223,22 @@ def build_vectors():
 
     return vectors  
 
-build_vectors()  
+
+
+# function to initialize w with a initial value
+def initialized_w (word_vectors, initial_value):
+    w_vector = {}
+    
+    for vector in word_vectors:
+        for word, count in vector[0].items():
+            if word not in w_vector:
+                w_vector[word] = initial_value
+    return w_vector
+
+word_vectors = build_vectors()  
+w_vector = initialized_w(word_vectors, 1)
+        
+    
 
 
         
