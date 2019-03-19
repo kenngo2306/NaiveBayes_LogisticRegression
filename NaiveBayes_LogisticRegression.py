@@ -22,6 +22,8 @@ spam_train_set_path='./train/spam'
 ham_test_set_path='./test/ham'
 spam_test_set_path='./test/spam'
 
+stop_words_path = "./stop_words.txt"
+
 # vocabulary bag is a dictionary
 #   key: the unique word
 #   value: array of 2 items
@@ -278,11 +280,22 @@ def update_w_vector(w_vector, p_vector, word_vectors, learning_rate, my_lambda):
         
     return w_vector_updated
 
+def throw_stop_words(word_vectors):
+    stop_words = read_stop_words(stop_words_path)
+    for word_vector in word_vectors:
+        for word in stop_words:
+            if word in word_vector[0]:
+                word_vector[0].pop(word)
+    return word_vectors
+    
 
 
-
-def logistic_regression(iterations, learning_rate, lambda_value):
-    word_vectors = build_vectors(ham_train_set_path, spam_train_set_path)  
+def logistic_regression(iterations, learning_rate, lambda_value, is_throw_stop_words):
+    word_vectors = build_vectors(ham_train_set_path, spam_train_set_path)
+    
+    if (is_throw_stop_words):
+        word_vectors = throw_stop_words(word_vectors)
+    
     w_vector = initialized_w(word_vectors, 1)
     
     print('accuracy before training =', calculate_accuracy(w_vector, ham_test_set_path, spam_test_set_path))
@@ -298,14 +311,14 @@ def logistic_regression(iterations, learning_rate, lambda_value):
         p_vector = calculate_P(w_vector, word_vectors)
         w_vector = update_w_vector(w_vector, p_vector, word_vectors, learning_rate, lambda_value)
         
-        tmp_accuracy = calculate_accuracy(w_vector, ham_test_set_path, spam_test_set_path)
-        if max_accuracy < tmp_accuracy:
-            max_accuracy = tmp_accuracy
-            max_i = i
+#        tmp_accuracy = calculate_accuracy(w_vector, ham_test_set_path, spam_test_set_path)
+#        if max_accuracy < tmp_accuracy:
+#            max_accuracy = tmp_accuracy
+#            max_i = i
             
 #        print('accuracy training at ', i, '= ', calculate_accuracy(w_vector, ham_test_set_path, spam_test_set_path))
         
-    print('accuracy max after training =', max_accuracy, ' at i=', max_i)
+    print('accuracy after training =', calculate_accuracy(w_vector, ham_test_set_path, spam_test_set_path))
 
 def calculate_accuracy(w_vector, ham_set, spam_set):
     word_vectors = build_vectors(ham_set, spam_set)
@@ -323,12 +336,10 @@ def calculate_accuracy(w_vector, ham_set, spam_set):
     return correct_count / total_examples    
 
 
-logistic_regression(500, 0.01, 0.003)
 
-iteration = 200
-
-for i in range (20):
-    logistic_regression(iteration, random.uniform(0.01,0.3), random.uniform(0.001, 0.03))
+iteration = 500
+logistic_regression(iteration, 0.1, 0.001, True)
+logistic_regression(iteration, 0.1, 0.001, False)
 
 
 print ('done')
