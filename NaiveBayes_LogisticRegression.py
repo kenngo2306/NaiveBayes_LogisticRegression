@@ -11,21 +11,14 @@ for text classification problem - spam detection
 
 import os 
 import glob
-import pandas as pd
+#import pandas as pd
 import math
-import copy
-import random
-from numba import jit
-from numba import vectorize
+import sys
+#from numba import jit
+#from numba import vectorize
 
 
-ham_train_set_path='./train/ham'
-spam_train_set_path='./train/spam'
 
-ham_test_set_path='./test/ham'
-spam_test_set_path='./test/spam'
-
-stop_words_path = "./stop_words.txt"
 
 # vocabulary bag is a dictionary
 #   key: the unique word
@@ -136,20 +129,14 @@ def naive_bayes_accuracy(ham_test_set_path, spam_test_set_path, prior, vocab):
             correct += 1  
     return correct/total
 
-prior, vocab = train_multinomial_nb([])
-print(naive_bayes_accuracy(ham_test_set_path, spam_test_set_path, prior, vocab))
 
-print ("######################")   
-prior, vocab = train_multinomial_nb(read_stop_words("./stop_words.txt"))
-
-print(naive_bayes_accuracy(ham_test_set_path, spam_test_set_path, prior, vocab))
 
 
 
 
 
 ###################################################################################################
-######################### Logistic Regression Algorithm part ######################################
+########################## Logistic Regression Algorithm  #########################################
 ###################################################################################################
 
 w0_string = 'w0_value'
@@ -256,7 +243,7 @@ def throw_stop_words(word_vectors):
     
 # logistic regression algorithm
 def logistic_regression(iterations, learning_rate, lambda_value, is_throw_stop_words):
-    print('##### Running Logistic Regression Algorithm #####')
+    
     # build a list of vectors, one vector per training example
     word_vectors = build_vectors(ham_train_set_path, spam_train_set_path)
     
@@ -267,13 +254,9 @@ def logistic_regression(iterations, learning_rate, lambda_value, is_throw_stop_w
     # initialize w_vector with initial values
     w_vector = initialized_w(word_vectors, 1)
     
-#    print('accuracy before training =', calculate_accuracy(w_vector, ham_test_set_path, spam_test_set_path))
-    print('learning rate= ', learning_rate) 
-    print('lambda= ', lambda_value) 
-    
+#    print('accuracy before training =', calculate_accuracy(w_vector, ham_test_set_path, spam_test_set_path))    
 #    max_i = 0
-#    max_accuracy = 0
-    
+#    max_accuracy = 0  
     
     for i in range(iterations): 
         calculate_P(w_vector, word_vectors)
@@ -318,9 +301,52 @@ def calculate_accuracy(w_vector, ham_set, spam_set):
 
 #logistic_regression(10, 0.12209511250421848, 0.0072047671136803715, True)
 
-        
-    
 
+
+
+#ham_train_set_path='./train/ham'
+#spam_train_set_path='./train/spam'
+#ham_test_set_path='./test/ham'
+#spam_test_set_path='./test/spam'
+#stop_words_path = "./stop_words.txt"
+
+try:
+    # handling user inputs
+    algo = sys.argv[1];
+    ham_train_set_path = sys.argv[2]
+    spam_train_set_path = sys.argv[3]
+    ham_test_set_path = sys.argv[4]
+    spam_test_set_path = sys.argv[5]
+    stop_words_path =sys.argv[6]
+    
+    if algo == 'NB':
+        print('##### Running Naive Bayes Learning Algorithm #####')
+              
+        prior, vocab = train_multinomial_nb([])
+        print('With stop words, accuracy = ', naive_bayes_accuracy(ham_test_set_path, spam_test_set_path, prior, vocab))
+    
+        prior, vocab = train_multinomial_nb(read_stop_words(stop_words_path))
+        print('Without stop words, accuracy = ', naive_bayes_accuracy(ham_test_set_path, spam_test_set_path, prior, vocab))
+        
+    elif algo == 'LR':
+        print('##### Running Logistic Regression Algorithm #####')
+        iterations = int(sys.argv[7])
+        learning_rate = float(sys.argv[8])
+        my_lambda = float(sys.argv[9])
+        
+        print('Number of iterations = ', iterations)
+        print('Learning rate = ', learning_rate)
+        print('Lambda = ', my_lambda)
+        
+        print('With stop words')
+        logistic_regression(iterations, learning_rate, my_lambda, False)
+        print('###########################')
+        print('Without stop words')
+        logistic_regression(iterations, learning_rate, my_lambda, True)
+    else:
+        print('Invalid input')        
+except:
+    print('Invalid input')
 
         
 
