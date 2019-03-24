@@ -71,3 +71,17 @@ accuracy before training = 0.2719665271966527
 learning rate=  0.1
 lambda=  0.001
 accuracy after training = 0.9205020920502092
+
+
+######################################################################3
+
+#with stop words
+learning rate=  0.12209511250421848
+lambda=  0.0072047671136803715
+accuracy max after training = 0.9372384937238494  at i =  144
+
+#without stop words
+accuracy before training = 0.2719665271966527
+learning rate=  0.12209511250421848
+lambda=  0.0072047671136803715
+accuracy max after training = 0.9205020920502092  at i =  82

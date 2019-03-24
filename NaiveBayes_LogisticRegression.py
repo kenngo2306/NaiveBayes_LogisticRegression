@@ -15,6 +15,9 @@ import pandas as pd
 import math
 import copy
 import random
+from numba import jit
+from numba import vectorize
+
 
 ham_train_set_path='./train/ham'
 spam_train_set_path='./train/spam'
@@ -35,10 +38,13 @@ def add_new_column(vocab_dict, word):
     vocab_dict[word] = [0,0,0.0,0.0]
     return vocab_dict
 
+# function to extract the vocabulary for Naive Bayes learning algorithm
+# this will go through all spam and ham example count the number of word for
+# each class
 def extract_vocabulary():
     vocab_dict = {}
     n_0 = 0
-    # build dictionary with ham emails
+    # build dictionary with ham emails training set
     for filename in glob.glob(os.path.join(ham_train_set_path, '*.txt')):
         n_0 += 1
         with open(filename, errors='ignore') as f:
@@ -49,7 +55,7 @@ def extract_vocabulary():
                         add_new_column(vocab_dict, word)
                     vocab_dict[word][0] += 1
     n_1 = 0
-    # build dictionary with spam emails       
+    # build dictionary with spam emails training set      
     for filename in glob.glob(os.path.join(spam_train_set_path, '*.txt')):
         n_1 += 1
         with open(filename, errors = 'ignore') as f:
@@ -59,42 +65,16 @@ def extract_vocabulary():
                     if word not in vocab_dict:
                         add_new_column(vocab_dict, word)
                     vocab_dict[word][1] += 1
-
     n = n_0 + n_1
-
     return n, n_0, n_1, vocab_dict
-    
 
-def count_in_ham(vocab_dict):
-    n_count = 0
-    # build dictionary with ham emails
-    for filename in glob.glob(os.path.join(ham_train_set_path, '*.txt')):
-        n_count += 1
-        with open(filename, errors='ignore') as f:
-            for line in f:
-                line_arr= line.strip().split(' ')
-                for word in line_arr:
-                    if word not in vocab_dict:
-                        add_new_column(vocab_dict, word)
-                    vocab_dict[word][0] += 1
-        return n_count
-
-def count_in_spam(vocab_dict):
-    n_count = 0
-    # build dictionary with spam emails       
-    for filename in glob.glob(os.path.join(spam_train_set_path, '*.txt')):
-        n_count += 1
-        with open(filename, errors = 'ignore') as f:
-            for line in f:
-                line_arr= line.strip().split(' ')
-                for word in line_arr:
-                    if word not in vocab_dict:
-                        add_new_column(vocab_dict, word)
-                    vocab_dict[word][1] += 1
-        return n_count
-
+# main algo - multinomial naive bayes learning algo
 def train_multinomial_nb (stop_words):
+    
+    # extract vocabulary from the training set
     n, n_0, n_1, vocab = extract_vocabulary()
+    
+    # remove stop words from vocab
     for word in stop_words:
         if word in vocab:
             vocab.pop(word)
@@ -132,7 +112,7 @@ def apply_multinomial_nb (vocab, prior, filename):
                         score[1] += custom_log2(vocab[word][3])
     return 0 if score[0] >= score[1] else 1
                     
-
+# function to read the stop words given the path, return a list of stop words
 def read_stop_words(path):
     stop_words = []
     with open(path) as f:
@@ -140,53 +120,44 @@ def read_stop_words(path):
             stop_words.append(line.strip())
     return stop_words
 
-#prior, vocab = train_multinomial_nb([])
-#total = 0
-#correct = 0
-#for test_ham_file_name in glob.glob(os.path.join(ham_test_set_path, '*.txt')):
-#    total += 1
-#    if apply_multinomial_nb(vocab, prior, test_ham_file_name) == 0:
-#        correct += 1
-#
-#for test_spam_file_name in glob.glob(os.path.join(spam_test_set_path, '*.txt')):
-#    total += 1
-#    if apply_multinomial_nb(vocab, prior, test_spam_file_name) == 1:
-#        correct += 1  
-#
-#print (correct)        
-#print (total)
-#print (correct/total)
-#
-#print ("######################")   
-#prior, vocab = train_multinomial_nb(read_stop_words("./stop_words.txt"))
-#total = 0
-#correct = 0
-#for test_ham_file_name in glob.glob(os.path.join(ham_test_set_path, '*.txt')):
-#    total += 1
-#    if apply_multinomial_nb(vocab, prior, test_ham_file_name) == 0:
-#        correct += 1
-#
-#for test_spam_file_name in glob.glob(os.path.join(spam_test_set_path, '*.txt')):
-#    total += 1
-#    if apply_multinomial_nb(vocab, prior, test_spam_file_name) == 1:
-#        correct += 1  
-#
-#print (correct)        
-#print (total)
-#print (correct/total)
+
+# function to calculate accuracy of Naive Bayes learning algorithm
+def naive_bayes_accuracy(ham_test_set_path, spam_test_set_path, prior, vocab):
+    total = 0
+    correct = 0
+    for test_ham_file_name in glob.glob(os.path.join(ham_test_set_path, '*.txt')):
+        total += 1
+        if apply_multinomial_nb(vocab, prior, test_ham_file_name) == 0:
+            correct += 1
     
-#print(apply_multinomial_nb(vocab, prior, filename2))
+    for test_spam_file_name in glob.glob(os.path.join(spam_test_set_path, '*.txt')):
+        total += 1
+        if apply_multinomial_nb(vocab, prior, test_spam_file_name) == 1:
+            correct += 1  
+    return correct/total
+
+prior, vocab = train_multinomial_nb([])
+print(naive_bayes_accuracy(ham_test_set_path, spam_test_set_path, prior, vocab))
+
+print ("######################")   
+prior, vocab = train_multinomial_nb(read_stop_words("./stop_words.txt"))
+
+print(naive_bayes_accuracy(ham_test_set_path, spam_test_set_path, prior, vocab))
 
 
-############# Logistic Regression Algorithm part ###################
+
+
+
+###################################################################################################
+######################### Logistic Regression Algorithm part ######################################
+###################################################################################################
+
 w0_string = 'w0_value'
-
-# def
 def add_new_column_2(vocab_dict, word):
     vocab_dict[word] = 0
     return vocab_dict
-# Build a list of vectors of count of word, 1 vector per training example
-    
+
+# Build a list of vectors of count of word, 1 vector per training example  
 def build_vectors(ham_set, spam_set):
     vectors = []
     # build vectoes with ham emails
@@ -224,9 +195,6 @@ def build_vectors(ham_set, spam_set):
 
     return vectors  
 
-
-
-
 # function to initialize w with a initial value
 def initialized_w (word_vectors, initial_value):
     w_vector = {}
@@ -241,7 +209,6 @@ def initialized_w (word_vectors, initial_value):
 # function to calculate P(Y=1 | X,W) for each training example
 def calculate_P(w_vector, word_vectors):
     p_vector = []
-    
     # loop through each training example
     for word_vector in word_vectors:
         my_sum = 0 
@@ -263,23 +230,22 @@ def calculate_P(w_vector, word_vectors):
     return p_vector
     
 
-
+# function to update w_vector
 def update_w_vector(w_vector, p_vector, word_vectors, learning_rate, my_lambda):
     w_vector_updated = {}
-    
-    for w_key, w_value in w_vector.items():
-         
+    for w_key, w_value in w_vector.items():   
         my_sum = 0
-        
         for i, word_vector in enumerate(word_vectors):
-            my_sum += 0 if (w_key not in word_vector[0]) else (word_vector[0][w_key] *  (word_vector[1] -  p_vector[i]))
-            
-       
-        
+            if w_key in word_vector[0]:
+                 my_sum += calculate_sum(word_vector[0][w_key], word_vector[1], p_vector[i])
         w_vector_updated[w_key] = w_value + learning_rate * my_sum - learning_rate * my_lambda * w_value
-        
     return w_vector_updated
 
+#@vectorize(["float64(int64, int64, float64)"], target='cuda')
+def calculate_sum(word_count, y, p):
+    return (word_count * (y-p))
+
+# throw stop words function for logistic regression
 def throw_stop_words(word_vectors):
     stop_words = read_stop_words(stop_words_path)
     for word_vector in word_vectors:
@@ -288,25 +254,28 @@ def throw_stop_words(word_vectors):
                 word_vector[0].pop(word)
     return word_vectors
     
-
-
+# logistic regression algorithm
 def logistic_regression(iterations, learning_rate, lambda_value, is_throw_stop_words):
+    print('##### Running Logistic Regression Algorithm #####')
+    # build a list of vectors, one vector per training example
     word_vectors = build_vectors(ham_train_set_path, spam_train_set_path)
     
+    # check if throw stop words is needed
     if (is_throw_stop_words):
         word_vectors = throw_stop_words(word_vectors)
     
+    # initialize w_vector with initial values
     w_vector = initialized_w(word_vectors, 1)
     
-    print('accuracy before training =', calculate_accuracy(w_vector, ham_test_set_path, spam_test_set_path))
+#    print('accuracy before training =', calculate_accuracy(w_vector, ham_test_set_path, spam_test_set_path))
     print('learning rate= ', learning_rate) 
     print('lambda= ', lambda_value) 
     
-    max_i = 0
-    max_accuracy = 0
+#    max_i = 0
+#    max_accuracy = 0
+    
     
     for i in range(iterations): 
-        
         calculate_P(w_vector, word_vectors)
         p_vector = calculate_P(w_vector, word_vectors)
         w_vector = update_w_vector(w_vector, p_vector, word_vectors, learning_rate, lambda_value)
@@ -315,34 +284,40 @@ def logistic_regression(iterations, learning_rate, lambda_value, is_throw_stop_w
 #        if max_accuracy < tmp_accuracy:
 #            max_accuracy = tmp_accuracy
 #            max_i = i
-            
 #        print('accuracy training at ', i, '= ', calculate_accuracy(w_vector, ham_test_set_path, spam_test_set_path))
-        
-    print('accuracy after training =', calculate_accuracy(w_vector, ham_test_set_path, spam_test_set_path))
+#    print('accuracy max after training =', max_accuracy, ' at i = ', max_i)
+    print('Accuracy after training =', calculate_accuracy(w_vector, ham_test_set_path, spam_test_set_path))
 
+# function to calculate the accuracy against a ham test set and a spam test set
 def calculate_accuracy(w_vector, ham_set, spam_set):
+    
     word_vectors = build_vectors(ham_set, spam_set)
+    
+    # calculate all probability vector for the given w_vector
     p_vector = calculate_P(w_vector, word_vectors)
     total_examples = len(p_vector)
     correct_count = 0
-    
+
     predicted_y_value = 0
-    
+    # calculate the accuracy
     for i in range(0,len(p_vector)):
         predicted_y_value = 1 if p_vector[i] >= 0.5 else 0
         if word_vectors[i][1] == predicted_y_value:
             correct_count += 1
-    
     return correct_count / total_examples    
 
 
 
-iteration = 500
-logistic_regression(iteration, 0.1, 0.001, True)
-logistic_regression(iteration, 0.1, 0.001, False)
+#for i in range(30):
+#    random_interation = random.randint(200, 550)
+#    random_learning_rate = random.uniform(0.09,0.29)
+#    random_lambda = random.uniform(0.0009,0.009)    
+#    print (random_interation, ' ', random_learning_rate,' ', random_lambda)
+#    logistic_regression(random_interation, random_learning_rate, random_lambda, True)
 
 
-print ('done')
+#logistic_regression(10, 0.12209511250421848, 0.0072047671136803715, True)
+
         
     
 
