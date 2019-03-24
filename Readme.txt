@@ -1,87 +1,36 @@
-accuracy before training = 0.2719665271966527
+This program implement Naive Bayes Learning algorithm and Logistic Regression algorithm
+to classify if an email is a spam or not
 
-logistic_regression(300, 0.009, 0.003)
-accuracy after training = 0.893305439330544
+Prerequisite:
+1. Install python 3
+2. Have training sets example for spam and not spam (ham) emails
+3. Have test sets example for spam and not spam (ham) emails
+4. A file contain a list of stop words to improve the algorithm 
+5. Have the code - NaiveBayes_LogisticRegression.py file ready
 
-logistic_regression(200, 0.02, 0.007)
-accuracy after training = 0.9058577405857741
+Execution:
+To run Naive Bayes learning algorithm, execute:
+    python .\NaiveBayes_LogisticRegression.py "NB" <train_ham_path> <train_spam_path> <test_ham_path> <test_spam_path> <stop_words_path>
+    Example:
+      python .\NaiveBayes_LogisticRegression.py "NB" "./train/ham" "./train/spam" "./test/ham" "./test/spam" "./stop_words.txt"
 
-logistic_regression(500, 0.1, 0.01)
-accuracy after training = 0.9163179916317992
+To run Logistic Regression algorithm, execute:
+	python .\NaiveBayes_LogisticRegression.py "LR" <train_ham_path> <train_spam_path> <test_ham_path> <test_spam_path> <stop_words_path> <number_of_interation> <learning_rate> <lambda_value>
+	Example:	
+	  python .\NaiveBayes_LogisticRegression.py "LR" "./train/ham" "./train/spam" "./test/ham" "./test/spam" "./stop_words.txt" 145 0.122 0.007
 
-logistic_regression(200, 0.09, 0.001)
-accuracy after training = 0.9163179916317992
+Sample output:
+##### Running Logistic Regression Algorithm #####
+Number of iterations =  145
+Learning rate =  0.122
+Lambda =  0.007
+With stop words
+Accuracy after training = 0.9205020920502092
+###########################
+Without stop words
+Accuracy after training = 0.9288702928870293
 
-logistic_regression(60, 0.02, 0.006)
-accuracy training at  50 =  0.9100418410041841
+##### Running Naive Bayes Learning Algorithm #####
+With stop words, accuracy =  0.9079497907949791
+Without stop words, accuracy =  0.9205020920502092
 
-learning rate=  0.0729631069609485
-lambda=  0.025939297887812688
-accuracy max after training = 0.9205020920502092  at i= 54
-
-learning rate=  0.05294877371962002
-lambda=  0.002458050553220705
-accuracy max after training = 0.9184100418410042  at i= 47
-
-learning rate=  0.19942494622134282
-lambda=  0.002068808460496554
-accuracy max after training = 0.9225941422594143  at i= 74
-
-#200 iterations
-#with throws stop word
-accuracy before training = 0.2719665271966527
-learning rate=  0.01
-lambda=  0.001
-accuracy after training = 0.9100418410041841
-accuracy before training = 0.2719665271966527
-
-#without throws stop word
-learning rate=  0.01
-lambda=  0.001
-accuracy after training = 0.895397489539749
-
-#####################################################################3
-
-
-#500 iterations
-#with throws stop word
-accuracy before training = 0.2719665271966527
-learning rate=  0.01
-lambda=  0.001
-accuracy after training = 0.9121338912133892
-
-#without throw stop words
-accuracy before training = 0.2719665271966527
-learning rate=  0.01
-lambda=  0.001
-accuracy after training = 0.899581589958159
-
-
-#####################################################################
-#500 iterations
-
-#with throws stop word
-accuracy before training = 0.2719665271966527
-learning rate=  0.1
-lambda=  0.001
-accuracy after training = 0.9309623430962343
-
-#without throw stop words
-accuracy before training = 0.2719665271966527
-learning rate=  0.1
-lambda=  0.001
-accuracy after training = 0.9205020920502092
-
-
-######################################################################3
-
-#with stop words
-learning rate=  0.12209511250421848
-lambda=  0.0072047671136803715
-accuracy max after training = 0.9372384937238494  at i =  144
-
-#without stop words
-accuracy before training = 0.2719665271966527
-learning rate=  0.12209511250421848
-lambda=  0.0072047671136803715
-accuracy max after training = 0.9205020920502092  at i =  82
